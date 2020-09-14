@@ -1,0 +1,28 @@
+POST http://localhost:3001/users
+Content-Type: application/json
+
+{
+    "firstName": "Hector",
+    "lastName": "Clara",
+    "email": "hector@gmail.com",
+    "password": "asdfasd"
+}
+##########
+
+POST http://localhost:3001/lists/
+Content-Type: application/json
+
+{
+    "title": "Hectors Movies AGAIN",
+    "userId": 10
+}
+##########
+PUT http://localhost:3001/lists/5
+Content-Type: application/json
+
+{
+
+    "title": "Babe Pig in The City",
+    "genre": "Documentary",
+    "tvdbid": 42213
+}
