@@ -4,19 +4,19 @@ const pool = require('../db')
 
 // Creats new user
 usersRouter.post('/', async (req, res) => {
-  const { body } = req
+  const { firstName, lastName, email, password } = req.body
   const saltRounds = 10
-  if (body.password.length < 4 || body.email.length < 4) {
+  if (password.length < 4 || email.length < 4) {
     //TODO: check for duplicate emails for user uniqueness
     return res.status(400).json({
       error: 'user name and password must be longer than 3 characters',
     })
   }
-  const passwordHash = await bcrypt.hash(body.password, saltRounds)
+  const passwordHash = await bcrypt.hash(password, saltRounds)
 
   const newUser = await pool.query(
     'INSERT INTO users(first_name, last_name, email, password) VALUES ($1, $2, $3, $4) RETURNING *',
-    [body.firstName, body.lastName, body.email, passwordHash]
+    [firstName, lastName, email, passwordHash]
   )
   res.status(200).json(newUser.rows[0])
 })
