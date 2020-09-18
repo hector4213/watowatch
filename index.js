@@ -1,20 +1,10 @@
-const express = require('express')
-const app = express()
-const cors = require('cors')
-const morgan = require('morgan')
-const listRouter = require('./controllers/listRouter')
-const usersRouter = require('./controllers/usersRouter')
-const loginRouter = require('./controllers/loginRouter')
+const http = require('http')
+const app = require('./app')
+const config = require('./utils/config')
+const logger = require('./utils/logger')
 
-app.use(cors())
-app.use(express.json())
-app.use(morgan('dev'))
-app.use('/lists', listRouter)
-app.use('/users', usersRouter)
-app.use('/login', loginRouter)
+const server = http.createServer(app)
 
-const PORT = 3001
-
-app.listen(PORT, () => {
-  console.log(`Server Online Running on PORT: ${PORT}`)
+server.listen(config.PORT, () => {
+  logger.info(`Server Online Running on PORT: ${config.PORT}`)
 })

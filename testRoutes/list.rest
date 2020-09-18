@@ -1,0 +1,30 @@
+POST http://localhost:3001/users
+Content-Type: application/json
+
+{
+    "firstName": "Hector",
+    "lastName": "Clara",
+    "email": "hector@gmail.com",
+    "password": "asdfasd"
+}
+##########
+
+POST http://localhost:3001/lists/
+Content-Type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiTWlhQGdtYWlsLmNvbSIsImlkIjoxMSwiaWF0IjoxNjAwNDI5MTI3fQ.-mn8FIs-TJxhQxmAnJdwkKDncWToFJdWtYquhfpjoHg
+
+{
+    "title": "Milk and stuff",
+    "userId": 11
+}
+##########
+PUT http://localhost:3001/lists/4
+Content-Type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiaGVjdG9yQGdtYWlsLmNvbSIsImlkIjoxMCwiaWF0IjoxNjAwNDQxODA2fQ.gDRFN5C3OiGVRjW7jyq5G6CIOlYhFtiWdT-bvLSCfdo
+
+{
+
+    "title": "a new movie",
+    "genre": "Documentary",
+    "tvdbid": 42213
+}

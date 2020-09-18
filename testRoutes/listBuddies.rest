@@ -1,0 +1,13 @@
+DELETE http://localhost:3001/lists/4/buddies/delete
+Content-Type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiaGVjdG9yQGdtYWlsLmNvbSIsImlkIjoxMCwiaWF0IjoxNjAwNDQ0NDEzfQ.mII4ihZ1oTyTA73fpc_6bPzLal8IgpanjXsfEDsJZKo
+
+{
+    "buddyId": "12"
+}
+
+###############
+
+DELETE http://localhost:3001/lists/11/
+Content-Type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiTWlhQGdtYWlsLmNvbSIsImlkIjoxMSwiaWF0IjoxNjAwNDI5MTI3fQ.-mn8FIs-TJxhQxmAnJdwkKDncWToFJdWtYquhfpjoHg
