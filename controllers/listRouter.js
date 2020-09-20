@@ -48,31 +48,39 @@ listRouter.get('/:id', async (req, res) => {
   res.status(200).json(userListTitle.rows[0])
 })
 
-// Add a movie to a list
+// Add a movie to a list by either user or buddy
 
 //TODO:add user auth to make sure only author can add items OK
 
 listRouter.put('/:id', async (req, res) => {
   const { id } = req.params
   const { title, genre, tvdbid } = req.body
-
-  if (!title || !genre || !tvdbid) {
+  const decodedToken = jwt.verify(req.token, process.env.SECRET)
+  if (!req.token) {
+    return res.status(401).json({ error: 'token missing or invalid' })
+  }
+  if (!title || !genre || !tvdbid || !decodedToken) {
     return res.status(400).json({ error: 'missing content' })
   }
 
   const isListAuthor = await pool.query(
     `
-  SELECT movie_lists.user_id
+  SELECT *
   FROM movie_lists
-  WHERE movie_lists.id = $1
+  WHERE movie_lists.id = $1 and movie_lists.user_id = $2
   `,
-    [id]
+    [id, decodedToken.id]
   )
-  const decodedToken = jwt.verify(req.token, process.env.SECRET)
-  if (!req.token || !decodedToken.id) {
-    return res.status(401).json({ error: 'token missing or invalid' })
-  }
-  if (isListAuthor.rows[0].user_id === decodedToken.id) {
+
+  const isBuddy = await pool.query(
+    `
+    SELECT * FROM movie_buddies
+    WHERE movie_buddies.movie_lists_id = $1 AND movie_buddies.user_id = $2
+  `,
+    [id, decodedToken.id]
+  )
+
+  if (isListAuthor.rows.length > 0 || isBuddy.rows.length > 0) {
     const isDuplicate = await pool.query(
       `
        SELECT movies.title
@@ -98,8 +106,9 @@ listRouter.put('/:id', async (req, res) => {
       )
       return res.status(204).json(addMovie.rows[0].id)
     }
-    res.status(409).json({ error: 'Item already in list' })
+    res.status(400).json({ error: 'Item already in list' })
   }
+  res.status(401).json({ error: 'User is neither author or a buddy' })
 })
 
 //Add a movie buddie to list OK
