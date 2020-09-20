@@ -50,7 +50,7 @@ listRouter.get('/:id', async (req, res) => {
 
 // Add a movie to a list by either user or buddy
 
-//TODO:add user auth to make sure only author can add items OK
+//TODO:add user auth to make sure only author OR buddy can add items OK
 
 listRouter.put('/:id', async (req, res) => {
   const { id } = req.params
@@ -192,7 +192,7 @@ listRouter.delete('/:id/buddies/delete', async (req, res) => {
   }
 })
 
-//Deletes a movie list by id
+//Deletes a movie list by id checks if current user is author
 
 listRouter.delete('/:id', async (req, res) => {
   const { id } = req.params
@@ -204,7 +204,7 @@ listRouter.delete('/:id', async (req, res) => {
 
   const isListAuthor = await pool.query(
     `
-  SELECT movie_lists.user_id
+  SELECT *
   FROM movie_lists
   WHERE movie_lists.id = $1 AND movie_lists.user_id = $2
   `,
@@ -219,6 +219,34 @@ listRouter.delete('/:id', async (req, res) => {
     return res.status(204).json('List Deleted')
   }
   res.status(401).json({ error: 'List can only be deleted by author' })
+})
+
+//Remove a movie by either author or buddy
+listRouter.delete('/:id/movies', async (req, res) => {
+  const { id } = req.params
+  const decodedToken = jwt.verify(req.token, process.env.SECRET)
+  if (!req.token || !decodedToken.id) {
+    return res.status(401).json({ error: 'token missing or invalid' })
+  }
+
+  const isListAuthor = await pool.query(`
+  SELECT *
+  FROM movie_lists
+  WHERE movie_lists.id = $1 AND movie_lists.user_id = $2
+  `)
+
+  const canBuddyDelete = await pool.query(
+    `
+    SELECT *
+    FROM movie_buddies
+    WHERE movie_buddies.movie_lists_id = $1 AND movie_buddies.user_id = $2
+  `,
+    [id, decodedToken.id]
+  )
+
+  if (isListAuthor.rows.length > 0 || canBuddyDelete.rows.length > 0) {
+    //TODO:
+  }
 })
 
 module.exports = listRouter
