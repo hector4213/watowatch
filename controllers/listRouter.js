@@ -192,7 +192,7 @@ listRouter.delete('/:id/buddies/delete', async (req, res) => {
   }
 })
 
-//Deletes a movie list by id checks if current user is author
+//Deletes ENTIRE movie list by id checks if current user is author
 
 listRouter.delete('/:id', async (req, res) => {
   const { id } = req.params
@@ -212,7 +212,7 @@ listRouter.delete('/:id', async (req, res) => {
   )
 
   if (isListAuthor.rows[0].user_id === decodedToken.id) {
-    const deletedList = await pool.query(
+    const deletedListItem = await pool.query(
       'DELETE FROM movie_lists WHERE movie_lists.id = $1',
       [id]
     )
@@ -224,16 +224,20 @@ listRouter.delete('/:id', async (req, res) => {
 //Remove a movie by either author or buddy
 listRouter.delete('/:id/movies', async (req, res) => {
   const { id } = req.params
+  const { movieId } = req.body
   const decodedToken = jwt.verify(req.token, process.env.SECRET)
   if (!req.token || !decodedToken.id) {
-    return res.status(401).json({ error: 'token missing or invalid' })
+    res.status(401).json({ error: 'token missing or invalid' })
   }
 
-  const isListAuthor = await pool.query(`
+  const isListAuthor = await pool.query(
+    `
   SELECT *
   FROM movie_lists
   WHERE movie_lists.id = $1 AND movie_lists.user_id = $2
-  `)
+  `,
+    [id, decodedToken.id]
+  )
 
   const canBuddyDelete = await pool.query(
     `
@@ -245,8 +249,16 @@ listRouter.delete('/:id/movies', async (req, res) => {
   )
 
   if (isListAuthor.rows.length > 0 || canBuddyDelete.rows.length > 0) {
-    //TODO:
+    const deletedListItem = await pool.query(
+      `
+      DELETE FROM movie_list_items
+      WHERE movie_list_items.movie_lists_id = $1 and movie_list_items.movies_id = $2 RETURNING *
+      `,
+      [id, movieId]
+    )
+    return res.status(204)
   }
+  res.status(401).json({ error: 'Only an author or buddy can delete a movie' })
 })
 
 module.exports = listRouter
