@@ -5,6 +5,9 @@ const loginRouter = require('express').Router()
 
 loginRouter.post('/', async (req, res) => {
   const { email, password } = req.body
+  if (!email || !password) {
+    res.status(401).send({ msg: 'Please enter a username and password' })
+  }
   const login = await pool.query(
     `
     SELECT *
@@ -16,7 +19,7 @@ loginRouter.post('/', async (req, res) => {
   console.log(login)
 
   if (login.rows.length < 1) {
-    res.status(401).send({ error: 'Email does not exist' })
+    res.status(401).send({ msg: 'Email does not exist' })
   }
 
   const userLogin = login.rows[0]
@@ -25,7 +28,7 @@ loginRouter.post('/', async (req, res) => {
       ? false
       : await bcrypt.compare(password, userLogin.password)
   if (!passwordCorrect) {
-    return res.status(401).send({ error: 'invalid password' })
+    return res.status(401).send({ msg: 'invalid password' })
   }
 
   const userForToken = {
@@ -35,7 +38,7 @@ loginRouter.post('/', async (req, res) => {
   console.log(userForToken)
 
   const token = jwt.sign(userForToken, process.env.SECRET)
-  res.status(200).send({
+  res.status(200).json({
     token,
     id: userLogin.id,
     user: userLogin.email,
