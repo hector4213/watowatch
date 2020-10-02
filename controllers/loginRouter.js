@@ -13,15 +13,19 @@ loginRouter.post('/', async (req, res) => {
     `,
     [email]
   )
+  console.log(login)
+
+  if (login.rows.length < 1) {
+    res.status(401).send({ error: 'Email does not exist' })
+  }
 
   const userLogin = login.rows[0]
-  console.log('this is user login', userLogin)
   const passwordCorrect =
     userLogin === null
       ? false
       : await bcrypt.compare(password, userLogin.password)
-  if (!(userLogin && passwordCorrect)) {
-    return res.json({ error: 'invalid email or password' })
+  if (!passwordCorrect) {
+    return res.status(401).send({ error: 'invalid password' })
   }
 
   const userForToken = {
@@ -31,9 +35,12 @@ loginRouter.post('/', async (req, res) => {
   console.log(userForToken)
 
   const token = jwt.sign(userForToken, process.env.SECRET)
-  res
-    .status(200)
-    .send({ token, user: userLogin.email, name: userLogin.first_name })
+  res.status(200).send({
+    token,
+    id: userLogin.id,
+    user: userLogin.email,
+    name: userLogin.first_name,
+  })
 })
 
 module.exports = loginRouter
