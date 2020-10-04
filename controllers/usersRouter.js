@@ -59,7 +59,7 @@ usersRouter.get('/:id', async (req, res) => {
     `,
     [id]
   )
-  res.status(200).json(selectedUser.rows)
+  res.status(200).json(selectedUser.rows[0])
 })
 
 module.exports = usersRouter
