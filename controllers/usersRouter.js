@@ -51,7 +51,7 @@ usersRouter.get('/:id', async (req, res) => {
   const { id } = req.params
   const selectedUser = await pool.query(
     `
-    SELECT  users.id, users.first_name, users.email, json_agg(movie_lists) as movelists FROM
+    SELECT  users.id, users.first_name, users.email, json_agg(movie_lists) as movielists FROM
     users
     LEFT JOIN movie_lists ON users.id = movie_lists.user_id
     WHERE users.id = $1
