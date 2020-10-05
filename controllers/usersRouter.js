@@ -29,7 +29,7 @@ usersRouter.post('/', async (req, res) => {
       'INSERT INTO users(first_name, last_name, email, password) VALUES ($1, $2, $3, $4) RETURNING *',
       [firstName, lastName, email, passwordHash]
     )
-    res.status(200).json(newUser.rows[0])
+    res.status(200).send({ msg: 'User Created!' })
   }
   res.status(409).json({ error: 'User already exists' })
 })
@@ -62,4 +62,17 @@ usersRouter.get('/:id', async (req, res) => {
   res.status(200).json(selectedUser.rows[0])
 })
 
+usersRouter.get('/lists/:id', async (req, res) => {
+  const { id } = req.params
+  const userCollection = await pool.query(
+    `
+  SELECT movie_lists.title, movie_lists.user_id, json_agg(DISTINCT movies)FROM movie_lists
+  LEFT JOIN movie_list_items ON movie_lists.id = movie_list_items.movie_lists_id
+  FULL OUTER JOIN movies ON movies.id = movie_list_items.movies_id
+  WHERE movie_lists.user_id = $1
+  GROUP BY 1,2 `,
+    [id]
+  )
+  res.status(200).json(userCollection.rows)
+})
 module.exports = usersRouter
