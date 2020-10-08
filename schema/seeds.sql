@@ -32,17 +32,17 @@ INSERT INTO movie_lists(title, user_id) VALUES ('Love me some an Arnold Palmer',
 INSERT INTO movie_lists(title, user_id) VALUES('Mellow Yellow', 7);
 
 /*Inserting random movies*/
-INSERT INTO movies (title, genre, tvdb_movieid) VALUES ('Love and Basketball', 'Romance', 420);
-INSERT INTO movies (title, genre, tvdb_movieid) VALUES ('Air Bud', 'Family', 3432);
-INSERT INTO movies (title, genre, tvdb_movieid) VALUES ('Basketball Diaries', 'Drama', 5454);
+INSERT INTO movies (title, genre, tvdb_movieid) VALUES ('Love and Basketball', 'Romance', 14736);
+INSERT INTO movies (title, genre, tvdb_movieid) VALUES ('Air Bud', 'Family', 20737);
+INSERT INTO movies (title, genre, tvdb_movieid) VALUES ('Basketball Diaries', 'Drama', 10474);
 
-INSERT INTO movies (title,  genre, tvdb_movieid) VALUES ('The Terminator', 'Action', 43343);
-INSERT INTO movies (title, genre, tvdb_movieid) VALUES ('Bonestorm', 'Action', 4343);
-INSERT INTO movies (title, genre, tvdb_movieid) VALUES ('Radioactiveman 14', 'Action', 3434);
+INSERT INTO movies (title,  genre, tvdb_movieid) VALUES ('The Terminator', 'Action', 218);
+INSERT INTO movies (title, genre, tvdb_movieid) VALUES ('The Simpsons Movie', 'Animation', 35);
+INSERT INTO movies (title, genre, tvdb_movieid) VALUES ('The Simpsons: Gone Wild', 'Animation', 622194);
 
-INSERT INTO movies (title, genre, tvdb_movieid) VALUES ('Happy Gilmour', 'Comedy', 3231);
-INSERT INTO movies (title, genre, tvdb_movieid) VALUES ('Golf Mania', 'Documentary', 2434);
-INSERT INTO movies (title, genre, tvdb_movieid) VALUES ('Hole in One', 'Comedy', 6414);
+INSERT INTO movies (title, genre, tvdb_movieid) VALUES ('Happy Gilmour', 'Comedy', 9614);
+INSERT INTO movies (title, genre, tvdb_movieid) VALUES ('Golf!', 'Documentary', 622905);
+INSERT INTO movies (title, genre, tvdb_movieid) VALUES ('The Golf Specialist', 'Comedy', 37358);
 
 
 
