@@ -67,11 +67,13 @@ usersRouter.get('/lists/:id', async (req, res) => {
   const { id } = req.params
   const userCollection = await pool.query(
     `
-  SELECT movie_lists.title, movie_lists.id as list_id, movie_lists.user_id, COALESCE(json_agg(DISTINCT movies.tvdb_movieid)filter(where movies.tvdb_movieid IS NOT NULL),'[]') as movies FROM movie_lists
-  LEFT JOIN movie_list_items ON movie_lists.id = movie_list_items.movie_lists_id
-  FULL OUTER JOIN movies ON movies.id = movie_list_items.movies_id
+    SELECT movie_lists.title, movie_lists.id as list_id, movie_lists.user_id, COALESCE(json_agg(DISTINCT movies.tvdb_movieid)filter(where movies.tvdb_movieid IS NOT NULL),'[]') as movies, COALESCE( json_agg( DISTINCT ( users.first_name, users.id))filter(WHERE users.first_name IS NOT NULL), '[]') AS buddy_ids  FROM movie_lists
+  INNER JOIN movie_list_items ON movie_lists.id = movie_list_items.movie_lists_id
+  INNER JOIN movies ON movies.id = movie_list_items.movies_id
+  FULL OUTER JOIN movie_buddies on movie_buddies.movie_lists_id = movie_lists.id
+  FULL OUTER JOIN users ON movie_buddies.user_id = users.id
   WHERE movie_lists.user_id = $1
-  GROUP BY 2 `,
+  GROUP BY 2`,
     [id]
   )
   res.status(200).json(userCollection.rows)
