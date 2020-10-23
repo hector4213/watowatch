@@ -122,7 +122,7 @@ listRouter.put('/:id', async (req, res) => {
 
 //Add a movie buddie to list OK
 
-listRouter.put('/:id/buddies/add', async (req, res) => {
+listRouter.post('/:id/buddies/add', async (req, res) => {
   const { id } = req.params
   const { buddyId } = req.body
   if (!buddyId) {
@@ -169,10 +169,10 @@ listRouter.put('/:id/buddies/add', async (req, res) => {
 
 listRouter.delete('/:id/buddies/delete', async (req, res) => {
   const { id } = req.params
-  const { buddyId } = req.body
+  const { buddyId } = req.query
 
   if (!buddyId) {
-    res.status(400).json({ error: 'missing buddy id' })
+    return res.status(400).json({ error: 'missing buddy id' })
   }
   //TODO: Check if user deleting is author of this movie list
   const decodedToken = jwt.verify(req.token, process.env.SECRET)
@@ -197,7 +197,7 @@ listRouter.delete('/:id/buddies/delete', async (req, res) => {
       `,
       [id, buddyId]
     )
-    res.status(204).json(deleteBuddy.rows)
+    return res.status(204).json(deleteBuddy.rows)
   }
 })
 
