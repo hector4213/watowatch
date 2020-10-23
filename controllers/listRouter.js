@@ -269,7 +269,8 @@ listRouter.put('/:id/movies', async (req, res) => {
       `,
       [id, movieId]
     )
-    return res.status(204)
+    console.log(deletedListItem)
+    return res.status(204).json({ msg: 'Movie Deleted!' })
   }
   return res
     .status(401)

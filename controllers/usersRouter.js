@@ -42,7 +42,8 @@ usersRouter.get('/', async (req, res) => {
   LEFT JOIN movie_lists ON users.id = movie_lists.user_id
   GROUP BY 1
     `)
-  res.json(allUsers.rows)
+  console.log(allUsers.rows)
+  res.status(200).json(allUsers.rows)
 })
 
 //Get a single user
