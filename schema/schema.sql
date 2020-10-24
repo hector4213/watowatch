@@ -40,6 +40,7 @@ CREATE TABLE movies (
     title VARCHAR(255),
     genre VARCHAR(255),
     tvdb_movieid INT,
+    seen BOOLEAN NOT NULL DEFAULT FALSE,
     PRIMARY KEY (id)
 );
 
