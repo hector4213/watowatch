@@ -39,25 +39,40 @@ listRouter.get('/shared/:id', async (req, res) => {
 
 //get specific movie list with movies and buddies OK(maybe show names and ids for front end)
 
+// listRouter.get('/:id', async (req, res) => {
+//   const { id } = req.params
+
+//   const userListTitle = await pool.query(
+//     `    SELECT movie_lists.id, movie_lists.title, json_agg(DISTINCT movies) AS movies, json_agg(DISTINCT movie_buddies.user_id) AS buddy_ids
+//       FROM movie_lists
+//       LEFT JOIN movie_list_items ON movie_lists.id = movie_list_items.movie_lists_id
+//       LEFT JOIN movies ON movies.id = movie_list_items.movies_id
+//       LEFT JOIN movie_buddies ON movie_buddies.movie_lists_id = movie_lists.id
+//       WHERE movie_lists.id = $1
+//       GROUP BY 1`,
+//     [id]
+//   )
+//   res.status(200).json(userListTitle.rows[0])
+// })
+
 listRouter.get('/:id', async (req, res) => {
   const { id } = req.params
-
-  const userListTitle = await pool.query(
-    `    SELECT movie_lists.id, movie_lists.title, json_agg(DISTINCT movies) AS movies, json_agg(DISTINCT movie_buddies.user_id) AS buddy_ids
-      FROM movie_lists
-      LEFT JOIN movie_list_items ON movie_lists.id = movie_list_items.movie_lists_id
-      LEFT JOIN movies ON movies.id = movie_list_items.movies_id
-      LEFT JOIN movie_buddies ON movie_buddies.movie_lists_id = movie_lists.id
-      WHERE movie_lists.id = $1
-      GROUP BY 1`,
+  const userCollection = await pool.query(
+    `
+    SELECT movie_lists.title, movie_lists.id as list_id, movie_lists.user_id, COALESCE(json_agg(DISTINCT movies)filter(where movies.tvdb_movieid IS NOT NULL),'[]') as movies, COALESCE( json_agg( DISTINCT ( users.first_name, users.id))filter(WHERE users.first_name IS NOT NULL), '[]') AS buddy_ids  FROM movie_lists
+   LEFT JOIN movie_list_items ON movie_lists.id = movie_list_items.movie_lists_id
+   LEFT JOIN movies ON movies.id = movie_list_items.movies_id
+  FULL OUTER JOIN movie_buddies on movie_buddies.movie_lists_id = movie_lists.id
+  FULL OUTER JOIN users ON movie_buddies.user_id = users.id
+  WHERE movie_lists.user_id = $1
+  GROUP BY 2`,
     [id]
   )
-  res.status(200).json(userListTitle.rows[0])
+  console.log(userCollection.rows)
+  res.status(200).json(userCollection.rows)
 })
 
-// Add a movie to a list by either user or buddy
-
-//TODO:add user auth to make sure only author OR buddy can add items OK
+// Either logged user, or buddied user can add movie to list
 
 listRouter.put('/:id', async (req, res) => {
   const { id } = req.params
