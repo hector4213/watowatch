@@ -22,14 +22,15 @@ listRouter.get('/shared/:id', async (req, res) => {
   const { id } = req.params
   const allLists = await pool.query(
     `
-    SELECT movie_lists.id AS list_id, movie_lists.title, movie_lists.user_id, json_agg(DISTINCT movies) AS movies, json_agg( DISTINCT ( users.first_name, users.id)) AS buddy_ids
+    SELECT movie_lists.id AS list_id, movie_lists.title, movie_lists.user_id, b.first_name AS author, json_agg(DISTINCT movies) AS movies, json_agg( DISTINCT ( users.first_name, users.id)) AS buddy_ids
     FROM movie_lists
     INNER JOIN movie_list_items ON movie_lists.id = movie_list_items.movie_lists_id
     INNER JOIN movies ON movies.id = movie_list_items.movies_id
     INNER JOIN movie_buddies ON movie_buddies.movie_lists_id = movie_lists.id
     INNER JOIN users ON movie_buddies.user_id = users.id
+    INNER JOIN users b ON movie_lists.user_id = b.id
     WHERE movie_buddies.user_id = $1
-    GROUP BY 1;   
+    GROUP BY 1, 4;   
     `,
     [id]
   )
