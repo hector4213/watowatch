@@ -190,7 +190,6 @@ listRouter.delete('/:id/buddies/delete', async (req, res) => {
   if (!buddyId) {
     return res.status(400).json({ error: 'missing buddy id' })
   }
-  //TODO: Check if user deleting is author of this movie list
   const decodedToken = jwt.verify(req.token, process.env.SECRET)
 
   if (!req.token || !decodedToken.id) {
@@ -246,10 +245,11 @@ listRouter.delete('/:id', async (req, res) => {
   res.status(401).json({ error: 'List can only be deleted by author' })
 })
 
-//Remove a movie by either author or buddy(editing is why put request )
-listRouter.put('/:id/movies', async (req, res) => {
-  const { id } = req.params
-  const { movieId } = req.body
+//Delete movie from a list, either buddy or author
+listRouter.delete('/:id/movie/:movieId', async (req, res) => {
+  const { id, movieId } = req.params
+
+  console.log(movieId)
   const decodedToken = jwt.verify(req.token, process.env.SECRET)
   if (!req.token || !decodedToken.id) {
     res.status(401).json({ error: 'token missing or invalid' })
