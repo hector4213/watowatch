@@ -22,7 +22,7 @@ listRouter.get('/shared/:id', async (req, res) => {
   const { id } = req.params
   const allLists = await pool.query(
     `
-    SELECT movie_lists.id AS list_id, movie_lists.title, movie_lists.user_id, b.first_name AS author, json_agg(DISTINCT movies) AS movies, json_agg( DISTINCT ( users.first_name, users.id)) AS buddy_ids
+    SELECT movie_lists.id AS list_id, movie_lists.title, movie_lists.user_id, b.first_name AS author, json_agg( DISTINCT jsonb_build_object('db_id', movies.id,'title', movies.title, 'seen', movie_list_items.seen, 'tvdb_movieid', movies.tvdb_movieid, 'genre', movies.genre)) AS movies, json_agg( DISTINCT ( users.first_name, users.id)) AS buddy_ids
     FROM movie_lists
     INNER JOIN movie_list_items ON movie_lists.id = movie_list_items.movie_lists_id
     INNER JOIN movies ON movies.id = movie_list_items.movies_id
@@ -37,35 +37,32 @@ listRouter.get('/shared/:id', async (req, res) => {
   res.status(200).json(allLists.rows)
 })
 
-//get specific movie list with movies and buddies OK(maybe show names and ids for front end)
+//Update movie as seen (toggles)
 
-// listRouter.get('/:id', async (req, res) => {
-//   const { id } = req.params
-
-//   const userListTitle = await pool.query(
-//     `    SELECT movie_lists.id, movie_lists.title, json_agg(DISTINCT movies) AS movies, json_agg(DISTINCT movie_buddies.user_id) AS buddy_ids
-//       FROM movie_lists
-//       LEFT JOIN movie_list_items ON movie_lists.id = movie_list_items.movie_lists_id
-//       LEFT JOIN movies ON movies.id = movie_list_items.movies_id
-//       LEFT JOIN movie_buddies ON movie_buddies.movie_lists_id = movie_lists.id
-//       WHERE movie_lists.id = $1
-//       GROUP BY 1`,
-//     [id]
-//   )
-//   res.status(200).json(userListTitle.rows[0])
-// })
+listRouter.put('/:id/movie/:movieId', async (req, res) => {
+  const { id, movieId } = req.params
+  const updateSeen = pool.query(
+    `
+  UPDATE movie_list_items
+  SET seen = NOT seen
+  WHERE movie_list_items.movie_lists_id = $1 AND movie_list_items.movies_id = $2
+  `,
+    [id, movieId]
+  )
+  return res.status(201).json({ msg: 'seen status updated' })
+})
 
 listRouter.get('/:id', async (req, res) => {
   const { id } = req.params
   const userCollection = await pool.query(
     `
-    SELECT movie_lists.title, movie_lists.id as list_id, movie_lists.user_id, COALESCE(json_agg(DISTINCT movies)filter(where movies.tvdb_movieid IS NOT NULL),'[]') as movies, COALESCE( json_agg( DISTINCT ( users.first_name, users.id))filter(WHERE users.first_name IS NOT NULL), '[]') AS buddy_ids  FROM movie_lists
-   LEFT JOIN movie_list_items ON movie_lists.id = movie_list_items.movie_lists_id
-   LEFT JOIN movies ON movies.id = movie_list_items.movies_id
-  FULL OUTER JOIN movie_buddies on movie_buddies.movie_lists_id = movie_lists.id
-  FULL OUTER JOIN users ON movie_buddies.user_id = users.id
-  WHERE movie_lists.user_id = $1
-  GROUP BY 2`,
+    SELECT movie_lists.title,json_agg(DISTINCT (users.first_name, users.id)) as buddy_ids, movie_lists.id AS list_Id, movie_lists.user_id, json_agg(DISTINCT jsonb_build_object('db_id', movies.id,'title', movies.title, 'seen', movie_list_items.seen, 'tvdb_movieid', movies.tvdb_movieid, 'genre', movies.genre)) as movies  FROM movie_lists
+    INNER JOIN movie_list_items  ON movie_lists.id = movie_list_items.movie_lists_id
+    INNER JOIN movies ON movies.id = movie_list_items.movies_id
+    FULL OUTER JOIN movie_buddies on movie_buddies.movie_lists_id = movie_lists.id
+    FULL OUTER JOIN users ON movie_buddies.user_id = users.id
+    WHERE movie_lists.user_id = $1
+    GROUP BY 3`,
     [id]
   )
   console.log(userCollection.rows)
@@ -74,7 +71,7 @@ listRouter.get('/:id', async (req, res) => {
 
 // Either logged user, or buddied user can add movie to list
 
-listRouter.put('/:id', async (req, res) => {
+listRouter.post('/:id', async (req, res) => {
   const { id } = req.params
   console.log(id)
   const { title, genre, tvdb_movieid } = req.body
@@ -104,6 +101,7 @@ listRouter.put('/:id', async (req, res) => {
   )
 
   if (isListAuthor.rows.length > 0 || isBuddy.rows.length > 0) {
+    //check for duplicates with id //pg unique
     const addMovie = await pool.query(
       `
         INSERT INTO movies(title, genre, tvdb_movieid) VALUES($1, $2, $3) RETURNING id 
@@ -272,17 +270,11 @@ listRouter.delete('/:id/movie/:movieId', async (req, res) => {
   `,
     [id, decodedToken.id]
   )
-
   if (isListAuthor.rows.length > 0 || canBuddyDelete.rows.length > 0) {
     const deletedListItem = await pool.query(
       `
-      DELETE FROM movie_list_items
-      WHERE movie_list_items.movies_id IN (
-      SELECT movie_list_items.movies_id FROM movie_list_items
-      INNER JOIN movies ON movies.id = movie_list_items.movies_id
-      WHERE movie_list_items.movie_lists_id = $1 AND movies.tvdb_movieid = $2
-)
-      `,
+    DELETE FROM movie_list_items 
+    WHERE movie_list_items.movie_lists_id = $1 AND movie_list_items.movies_id = $2`,
       [id, movieId]
     )
     console.log(deletedListItem)
