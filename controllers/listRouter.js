@@ -56,15 +56,15 @@ listRouter.get('/:id', async (req, res) => {
   const { id } = req.params
   const userCollection = await pool.query(
     `
-    SELECT movie_lists.title,json_agg(DISTINCT (users.first_name, users.id)) as buddy_ids, movie_lists.id AS list_Id, movie_lists.user_id, json_agg(DISTINCT jsonb_build_object('db_id', movies.id,'title', movies.title, 'seen', movie_list_items.seen, 'tvdb_movieid', movies.tvdb_movieid, 'genre', movies.genre)) as movies  FROM movie_lists
-    INNER JOIN movie_list_items  ON movie_lists.id = movie_list_items.movie_lists_id
-    INNER JOIN movies ON movies.id = movie_list_items.movies_id
+    SELECT movie_lists.title,COALESCE(json_agg(DISTINCT (users.first_name, users.id))FILTER (WHERE users.id IS NOT NULL), '[]') as buddy_ids, movie_lists.id AS list_Id, movie_lists.user_id, COALESCE(json_agg(DISTINCT jsonb_build_object('db_id', movies.id,'title', movies.title, 'seen', movie_list_items.seen, 'tvdb_movieid', movies.tvdb_movieid, 'genre', movies.genre))FILTER (WHERE movies.id IS NOT NULL), '[]') as movies  FROM movie_lists
+    FULL OUTER JOIN movie_list_items  ON movie_lists.id = movie_list_items.movie_lists_id
+    FULL OUTER JOIN movies ON movies.id = movie_list_items.movies_id
     FULL OUTER JOIN movie_buddies on movie_buddies.movie_lists_id = movie_lists.id
     FULL OUTER JOIN users ON movie_buddies.user_id = users.id
     WHERE movie_lists.user_id = $1
     GROUP BY 3`,
     [id]
-  )
+  ) //Fix cant see a newly created list
   console.log(userCollection.rows)
   res.status(200).json(userCollection.rows)
 })

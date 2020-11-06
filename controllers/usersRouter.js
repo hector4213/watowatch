@@ -37,7 +37,7 @@ usersRouter.post('/', async (req, res) => {
 // Gets all users
 usersRouter.get('/', async (req, res) => {
   const allUsers = await pool.query(`
-  SELECT users.id, users.first_name, users.email, json_agg(movie_lists) as movelists FROM
+  SELECT users.id, users.first_name, users.email, COALESCE(json_agg(movie_lists)FILTER (WHERE movie_lists IS NOT NULL), '[]') as movelists FROM
   users
   LEFT JOIN movie_lists ON users.id = movie_lists.user_id
   GROUP BY 1
