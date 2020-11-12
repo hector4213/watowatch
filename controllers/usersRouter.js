@@ -27,7 +27,7 @@ usersRouter.post('/', async (req, res) => {
 
     const newUser = await pool.query(
       'INSERT INTO users(first_name, last_name, email, password) VALUES ($1, $2, $3, $4) RETURNING *',
-      [firstName, lastName, email, passwordHash]
+      [firstName, lastName, email.toLowerCase(), passwordHash]
     )
     res.status(200).send({ msg: 'User Created!' })
   }
