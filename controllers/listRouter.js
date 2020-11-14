@@ -6,6 +6,11 @@ const pool = require('../db')
 
 listRouter.post('/', async (req, res) => {
   const { title } = req.body
+  if (title.length > 30 || title.length < 2) {
+    return res
+      .status(400)
+      .json({ error: 'Titles can have  min characters of 3 and a max of 30' })
+  }
   const decodedToken = jwt.verify(req.token, process.env.SECRET)
   if (!req.token || !decodedToken.id) {
     return res.status(401).json({ error: 'token missing or invalid' })
