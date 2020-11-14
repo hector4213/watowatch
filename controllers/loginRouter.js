@@ -16,7 +16,6 @@ loginRouter.post('/', async (req, res) => {
     `,
     [email]
   )
-  console.log(login)
 
   if (login.rows.length < 1) {
     res.status(401).send({ msg: 'Email does not exist' })
@@ -35,7 +34,6 @@ loginRouter.post('/', async (req, res) => {
     user: userLogin.email,
     id: userLogin.id,
   }
-  console.log(userForToken)
 
   const token = jwt.sign(userForToken, process.env.SECRET)
   res.status(200).json({
