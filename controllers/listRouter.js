@@ -2,7 +2,7 @@ const listRouter = require('express').Router()
 const jwt = require('jsonwebtoken')
 const pool = require('../db')
 
-//Creates new movie list OK
+//Creates new movie list with title
 
 listRouter.post('/', async (req, res) => {
   const { title } = req.body
@@ -22,7 +22,7 @@ listRouter.post('/', async (req, res) => {
   res.status(201).json(newMovieList.rows[0])
 })
 
-//get all movielists from all users with user buddies (search?) OK
+//get all movielists where logged user is a buddy
 listRouter.get('/shared/:id', async (req, res) => {
   const { id } = req.params
   const allLists = await pool.query(
@@ -73,11 +73,10 @@ listRouter.get('/:id', async (req, res) => {
   res.status(200).json(userCollection.rows)
 })
 
-// Either logged user, or buddied user can add movie to list
+// Either logged user, or user that is buddy can add/remove movie to list
 
 listRouter.post('/:id', async (req, res) => {
   const { id } = req.params
-  console.log(id)
   const { title, genre, tvdb_movieid } = req.body
   const decodedToken = jwt.verify(req.token, process.env.SECRET)
   if (!req.token) {
@@ -138,7 +137,7 @@ listRouter.post('/:id', async (req, res) => {
   return res.status(401).json({ error: 'User is neither author or a buddy' })
 })
 
-//Add a movie buddie to list OK
+//Add a movie buddy to list
 
 listRouter.post('/:id/buddies/add', async (req, res) => {
   const { id } = req.params
@@ -161,7 +160,6 @@ listRouter.post('/:id/buddies/add', async (req, res) => {
     [id, decodedToken.id]
   )
   if (isListAuthor.rows[0].user_id === decodedToken.id) {
-    //TODO: Use SELECT to check for duplicate buddy
     const isDuplicate = await pool.query(
       `
     SELECT * FROM movie_buddies
@@ -260,7 +258,6 @@ listRouter.delete('/:id', async (req, res) => {
 listRouter.delete('/:id/movie/:movieId', async (req, res) => {
   const { id, movieId } = req.params
 
-  console.log(movieId)
   const decodedToken = jwt.verify(req.token, process.env.SECRET)
   if (!req.token || !decodedToken.id) {
     res.status(401).json({ error: 'token missing or invalid' })
