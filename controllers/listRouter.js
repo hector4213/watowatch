@@ -69,8 +69,7 @@ listRouter.get('/:id', async (req, res) => {
     WHERE movie_lists.user_id = $1
     GROUP BY 3`,
     [id]
-  ) //Fix cant see a newly created list
-  console.log(userCollection.rows)
+  )
   res.status(200).json(userCollection.rows)
 })
 
@@ -237,6 +236,16 @@ listRouter.delete('/:id', async (req, res) => {
   `,
     [id, decodedToken.id]
   )
+  const doExist = await pool.query(
+    `
+  SELECT * from movie_lists
+  WHERE movie_lists.id = $1
+  `,
+    [id]
+  )
+  if (doExist.rows.length < 1) {
+    return res.status(400).json({ error: 'List not found or already deleted' })
+  }
 
   if (isListAuthor.rows[0].user_id === decodedToken.id) {
     const deletedListItem = await pool.query(
@@ -245,7 +254,6 @@ listRouter.delete('/:id', async (req, res) => {
     )
     return res.status(204).json('List Deleted')
   }
-  res.status(401).json({ error: 'List can only be deleted by author' })
 })
 
 //Delete movie from a list, either buddy or author

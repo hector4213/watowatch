@@ -41,7 +41,7 @@ INSERT INTO movies (title, genre, tvdb_movieid) VALUES ('The Simpsons Movie', 'A
 INSERT INTO movies (title, genre, tvdb_movieid) VALUES ('The Simpsons: Gone Wild', 'Animation', 622194);
 
 INSERT INTO movies (title, genre, tvdb_movieid) VALUES ('Happy Gilmour', 'Comedy', 9614);
-INSERT INTO movies (title, genre, tvdb_movieid) VALUES ('Golf!', 'Documentary', 622905);
+INSERT INTO movies (title, genre, tvdb_movieid) VALUES ('The Glass Castle', 'Drama', 336000);
 INSERT INTO movies (title, genre, tvdb_movieid) VALUES ('The Golf Specialist', 'Comedy', 37358);
 
 
