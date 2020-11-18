@@ -40,7 +40,6 @@ CREATE TABLE movies (
     title VARCHAR(255),
     genre VARCHAR(255),
     tvdb_movieid INT,
-    seen BOOLEAN NOT NULL DEFAULT FALSE,
     PRIMARY KEY (id)
 );
 
@@ -49,6 +48,7 @@ CREATE TABLE movie_list_items (
     id SERIAL NOT NULL,
     movie_lists_id INT,
     movies_id INT,
+    seen BOOLEAN NOT NULL DEFAULT FALSE,
     PRIMARY KEY(id),
     FOREIGN KEY(movie_lists_id) REFERENCES movie_lists(id) ON DELETE CASCADE,
     FOREIGN KEY(movies_id) REFERENCES movies(id) ON DELETE CASCADE
