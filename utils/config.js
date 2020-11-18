@@ -8,4 +8,5 @@ module.exports = {
   PG_USER,
   PG_PORT,
   DB,
+  PG_HOST,
 }
