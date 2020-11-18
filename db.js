@@ -4,7 +4,7 @@ const config = require('./utils/config')
 const pool = new Pool({
   user: config.PG_USER,
   password: config.POSTGRES_KEY, ///config to config
-  host: 'localhost',
+  host: config.PG_HOST,
   port: config.PG_PORT,
   database: config.DB,
 })
